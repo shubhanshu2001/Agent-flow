@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+
+# Environment Variables
+.env
+
+# IDE / Editor files
+.vscode/
+.idea/
+
+# PyCharm / VSCode config
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled files
+*.pyo
+
+# Migrations (optional, if you don't want alembic cache)
+alembic/versions/*.pyc
