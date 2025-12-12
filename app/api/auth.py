@@ -1,5 +1,5 @@
 # app/api/auth.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -43,7 +43,7 @@ def signup(data: UserCreate, db: Session = Depends(get_db)):
 
 # LOGIN
 @router.post("/login", response_model=LoginResponse, status_code=200)
-def login(data: UserLogin, db: Session = Depends(get_db)):
+def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
 
     if not user:
@@ -54,18 +54,6 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
 
     token = create_access_token({"sub": str(user.id)})
 
-    response = JSONResponse(
-        content={
-            "access_token": token,
-            "token_type": "bearer",
-            "user": {
-                "id": user.id,
-                "fullname": user.fullname,
-                "email": user.email
-            }
-        }
-    )
-
     response.set_cookie(
         key="access_token",
         value=token,
@@ -74,7 +62,11 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
         max_age=60*60*24
     )
 
-    return response
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user
+    }
 
 # LOGOUT
 @router.post("/logout")
