@@ -7,6 +7,7 @@ from fastapi import Depends
 from app.api.deps import get_current_user
 
 from app.api.auth import router as auth_router
+from app.api.session_routes import router as session_router
 
 
 
@@ -18,8 +19,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Agentic Workflow Companion", lifespan=lifespan)
 
 
-# Auth routes
+# routes
 app.include_router(auth_router)
+app.include_router(session_router)
 
 @app.get("/me")
 def get_me(user : User = Depends(get_current_user)):
