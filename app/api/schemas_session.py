@@ -18,6 +18,13 @@ class MessageResponse(BaseModel):
     class Config:
         orm_mode = True
 
+class SendMessageResponse(BaseModel):
+    user_message: MessageResponse
+    assistant_message: MessageResponse
+
+    class Config:
+        orm_mode = True
+
 
 class SessionCreate(BaseModel):
     title: Optional[str] = None
