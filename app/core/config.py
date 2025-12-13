@@ -13,6 +13,7 @@ class Settings(BaseModel):
     access_token_expire_minutes: int
     openai_api_key: str | None = None
     groq_api_key: str | None = None
+    tavily_api_key: str | None = None
 
     class Config:
         frozen = True  # make it immutable
@@ -25,5 +26,6 @@ def get_settings() -> Settings:
         algorithm=os.getenv("ALGORITHM"),
         access_token_expire_minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
-        groq_api_key=os.getenv("GROQ_API_KEY")
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        tavily_api_key=os.getenv("TAVILY_API_KEY")
     )

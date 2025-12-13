@@ -6,20 +6,47 @@ from typing import TypedDict, Annotated, List
 
 from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
-from langchain_core.messages import (BaseMessage, SystemMessage)
+from langchain_core.messages import (BaseMessage, AIMessage, SystemMessage)
+from app.tools.web_search import web_search
+from langchain_core.messages import ToolMessage
 
 settings = get_settings()
+
+tools = [web_search]
 
 # 1. Define the shared LLM used by all agents (Groq)
 llm = ChatGroq(
     model="openai/gpt-oss-120b",
     api_key=settings.groq_api_key,
     temperature=0.2,
-)
+).bind_tools(tools)
 
 
 class AgentState(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
+
+
+def web_search_node(state: AgentState) -> AgentState:
+
+    last_msg = state["messages"][-1]
+    tool_call = last_msg.tool_calls[0]
+    
+    # can remove this condition so even different tool call can fallback to web_search.
+    if tool_call["name"] != "web_search":
+        return state
+
+    print("Calling web_search tool....")
+
+    query = tool_call["args"]["query"]
+    results = web_search(query)
+
+    tool_msg = ToolMessage(
+        tool_call_id=tool_call["id"],
+        content=str(results),
+        name="web_search"
+    )
+
+    return {"messages": [tool_msg]}
 
 
 def planner_node(state: AgentState) -> AgentState:
@@ -80,16 +107,30 @@ def critic_node(state: AgentState) -> AgentState:
     result = llm.invoke(prompt)
     return {"messages": [result]}
 
+def route_from_executor(state: AgentState):
+
+    last = state["messages"][-1]
+
+    if len(last.tool_calls) > 0:
+        return "web_search"
+    
+    return "critic"
+
 
 graph = StateGraph(AgentState)
 
 graph.add_node("planner", planner_node)
 graph.add_node("executor", executor_node)
+graph.add_node("web_search", web_search_node)
 graph.add_node("critic", critic_node)
 
 graph.add_edge(START, "planner")
 graph.add_edge("planner", "executor")
-graph.add_edge("executor", "critic")
+graph.add_conditional_edges("executor",
+    route_from_executor,
+    ["web_search", "critic"]
+)
+graph.add_edge("web_search", "executor")
 graph.add_edge("critic", END)
 
 multi_agent_app = graph.compile()
