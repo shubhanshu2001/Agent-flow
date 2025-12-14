@@ -7,7 +7,7 @@ settings = get_settings()
 tavily = TavilyClient(api_key=settings.tavily_api_key)
 
 @register_tool("web_search")
-def web_search(query: str, max_results: int = 3):
+def web_search(query: str, max_results: int = 5):
     """
     Returns list of {title, url, snippet}.
     """
