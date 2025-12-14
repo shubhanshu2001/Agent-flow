@@ -2,6 +2,7 @@
 from tavily import TavilyClient
 from app.core.config import get_settings
 from app.tools.registry import register_tool
+from app.utils.cache import cache_get, cache_set
 
 settings = get_settings()
 tavily = TavilyClient(api_key=settings.tavily_api_key)
@@ -11,6 +12,12 @@ def web_search(query: str, max_results: int = 5):
     """
     Returns list of {title, url, snippet}.
     """
+
+    key = f"search:{query}:{max_results}"
+    cached = cache_get(key)
+    if cached:
+        return cached
+
     try:
         response = tavily.search(
             query=query,
@@ -26,6 +33,8 @@ def web_search(query: str, max_results: int = 5):
                 "url": item.get("url"),
                 "snippet": item.get("content"),
             })
+
+        cache_set(key, clean_results, ttl=3600)
 
         return clean_results
     
