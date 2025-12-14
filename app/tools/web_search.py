@@ -1,11 +1,12 @@
 # app/tools/web_search.py
 from tavily import TavilyClient
 from app.core.config import get_settings
+from app.tools.registry import register_tool
 
 settings = get_settings()
 tavily = TavilyClient(api_key=settings.tavily_api_key)
 
-
+@register_tool("web_search")
 def web_search(query: str, max_results: int = 3):
     """
     Returns list of {title, url, snippet}.
