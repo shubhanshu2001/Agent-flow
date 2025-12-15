@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine, Base
 from app.models import User
 from contextlib import asynccontextmanager
@@ -15,6 +16,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Agentic Workflow Companion", lifespan=lifespan)
 
+origins = [
+    "http://localhost:5173",
+    "https://agentflow.vercel.app",
+    "https://*.vercel.app"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # routes
 app.include_router(auth_router)
