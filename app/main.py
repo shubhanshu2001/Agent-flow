@@ -17,13 +17,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Agentic Workflow Companion", lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://agentflow-sy.vercel.app",
+    "https://*.vercel.app"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
