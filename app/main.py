@@ -18,7 +18,7 @@ app = FastAPI(title="Agentic Workflow Companion", lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
-    "https://agentflow-sy.vercel.app",
+    "https://agentflow.vercel.app",
     "https://*.vercel.app"
 ]
 
