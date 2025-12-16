@@ -16,10 +16,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Agentic Workflow Companion", lifespan=lifespan)
 
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return {}
+
 origins = [
     "http://localhost:5173",
-    "https://agentflow.vercel.app",
-    "https://*.vercel.app"
+    "https://agentflow-sy.vercel.app"
 ]
 
 app.add_middleware(
